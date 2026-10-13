@@ -1,9 +1,9 @@
 output "application_url" {
   description = "Public URL of the application load balancer."
-  value       = "http://${aws_lb.application.dns_name}"
+  value       = module.web_app.application_url
 }
 
 output "vpc_id" {
   description = "ID of the project VPC."
-  value       = aws_vpc.main.id
+  value       = module.network.vpc_id
 }

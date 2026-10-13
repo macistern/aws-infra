@@ -2,6 +2,21 @@
 
 A small, deployable AWS web platform built with Terraform. It demonstrates infrastructure provisioning, network design, least-privilege network access, and infrastructure validation in CI.
 
+## Repository structure
+
+```text
+.
+├── main.tf                 # Root module: connects reusable child modules
+├── providers.tf            # AWS provider configuration and default tags
+├── variables.tf            # Deployment-level configuration
+├── outputs.tf              # Outputs exposed by the root module
+└── modules/
+    ├── network/            # VPC, public subnets, internet gateway, and routes
+    └── web_app/            # Security groups, EC2, and application load balancer
+```
+
+The root module owns deployment configuration and passes explicit inputs between child modules. Child modules do not configure providers or credentials; they inherit the AWS provider configured by the root.
+
 ## Architecture
 
 ```text
@@ -33,15 +48,20 @@ The Application Load Balancer spans two public subnets. The demo instance is in 
 
 ## Deploy
 
+Run these commands from the repository root. Configure AWS credentials using an AWS CLI profile, SSO, or environment variables before planning.
+
 ```bash
 terraform init
 terraform fmt -recursive
 terraform validate
 terraform plan
+# Review the plan before approving changes.
 terraform apply
 ```
 
 After the apply completes, open the `application_url` Terraform output. The target-group health check may take a couple of minutes while Nginx installs.
+
+The root configuration includes `moved` blocks for the resources that were moved into child modules. If you have an existing Terraform state from the earlier root-only layout, review `terraform plan` and confirm it shows state moves rather than destroying and recreating those resources. Do not remove the `moved` blocks until all relevant states have been migrated.
 
 ## Clean up
 
@@ -53,18 +73,18 @@ terraform destroy
 
 ## Configuration
 
-Defaults target `us-east-1` and use a `t3.micro` instance. Override values without committing credentials or personal settings:
+Defaults target `us-east-2` and use a `t3.micro` instance. Override values without committing credentials or personal settings:
 
 ```bash
-terraform apply -var='aws_region=us-east-1' -var='environment=dev'
+terraform apply -var='aws_region=us-east-2' -var='environment=dev'
 ```
 
-Files named `*.tfvars` are ignored by Git. Keep secrets out of this repository and use AWS IAM roles, SSO, or a secrets manager.
+Files named `*.tfvars` are ignored by Git. Keep secrets out of this repository and use AWS IAM roles, SSO, or a secrets manager. The Terraform dependency lock file (`.terraform.lock.hcl`) should be committed so local runs and CI use consistent provider versions.
 
 ## Next steps
 
 1. Add HTTPS with ACM and a Route 53 domain.
 2. Move the application tier to private subnets.
-3. Add remote Terraform state in S3 with DynamoDB locking.
+3. Add remote Terraform state in S3 with native S3 lock files.
 4. Add CloudWatch alarms, flow logs, and a budget alert.
 5. Replace the demo server with a containerized application.
