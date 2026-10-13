@@ -1,6 +1,6 @@
 # Terraform AWS Secure Web Platform
 
-A small, deployable AWS web platform built with Terraform. It demonstrates infrastructure provisioning, network design, least-privilege network access, and infrastructure validation in CI.
+A small, deployable AWS personal landing page built with Terraform. It demonstrates infrastructure provisioning, network design, least-privilege network access, and infrastructure validation in CI.
 
 ## Repository structure
 
@@ -59,7 +59,7 @@ terraform plan
 terraform apply
 ```
 
-After the apply completes, open the `application_url` Terraform output. The target-group health check may take a couple of minutes while Nginx installs.
+After the apply completes, open the `application_url` Terraform output. It serves a personal landing page for Matías Cisterna with GitHub and LinkedIn contact links. The target-group health check may take a couple of minutes while Nginx installs.
 
 The root configuration includes `moved` blocks for the resources that were moved into child modules. If you have an existing Terraform state from the earlier root-only layout, review `terraform plan` and confirm it shows state moves rather than destroying and recreating those resources. Do not remove the `moved` blocks until all relevant states have been migrated.
 
